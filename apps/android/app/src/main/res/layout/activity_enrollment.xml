@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#08090B"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            android:id="@+id/txtHeaderTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/onboarding_title"
+            android:textColor="#F4F1EA"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/txtHeaderSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Fast, zero-trust onboarding with hardware-backed keys"
+            android:textColor="#9499A3"
+            android:textSize="13sp" />
+
+        <!-- Stepper Indicator -->
+        <LinearLayout
+            android:id="@+id/layoutStepper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal"
+            android:weightSum="4">
+
+            <TextView
+                android:id="@+id/stepTab1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="1. Scan"
+                android:textColor="#C8A66A"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/stepTab2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="2. Verify"
+                android:textColor="#646A74"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/stepTab3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="3. Approve"
+                android:textColor="#646A74"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/stepTab4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="4. Connected"
+                android:textColor="#646A74"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- STEP 1: SCAN -->
+        <LinearLayout
+            android:id="@+id/layoutStepScan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="#101216"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/step_scan_title"
+                android:textColor="#F4F1EA"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="3dp"
+                android:text="@string/step_scan_desc"
+                android:textColor="#9499A3"
+                android:textSize="13sp" />
+
+            <!-- Live Camera Viewfinder (In-App Scanning) -->
+            <RelativeLayout
+                android:id="@+id/layoutCameraContainer"
+                android:layout_width="match_parent"
+                android:layout_height="260dp"
+                android:layout_marginTop="16dp"
+                android:background="#000000"
+                android:visibility="gone">
+
+                <TextureView
+                    android:id="@+id/viewfinderTexture"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+                <!-- Targeting Reticle Overlay -->
+                <View
+                    android:id="@+id/viewfinderReticle"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/ic_vajra"
+                    android:alpha="0.2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="12dp"
+                    android:background="#9908090B"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:text="Align QR Code inside frame"
+                    android:textColor="#C8A66A"
+                    android:textSize="11sp" />
+            </RelativeLayout>
+
+            <!-- Camera Permission Denied Card -->
+            <LinearLayout
+                android:id="@+id/layoutCameraDenied"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="#211214"
+                android:orientation="vertical"
+                android:padding="14dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Camera Permission Required"
+                    android:textColor="#F85149"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:lineSpacingExtra="2dp"
+                    android:text="@string/camera_denied_desc"
+                    android:textColor="#9499A3"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btnRetryCamera"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="10dp"
+                    android:backgroundTint="#C8A66A"
+                    android:text="@string/btn_retry_camera"
+                    android:textColor="#08090B"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnScanQr"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="18dp"
+                android:backgroundTint="#C8A66A"
+                android:text="@string/btn_scan_qr"
+                android:textColor="#08090B"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnPasteBundle"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#161B22"
+                android:text="@string/paste_pairing_bundle"
+                android:textColor="#F4F1EA" />
+
+            <TextView
+                android:id="@+id/btnToggleManual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:text="@string/toggle_manual_entry"
+                android:textColor="#C8A66A"
+                android:textSize="12sp" />
+
+            <!-- Collapsible Manual Input Container -->
+            <LinearLayout
+                android:id="@+id/layoutManualFields"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/inputServerUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Server URL (e.g. http://10.0.2.2:3000)"
+                    android:inputType="textUri"
+                    android:textColor="#F4F1EA"
+                    android:textColorHint="#646A74"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/inputToken"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enrollment token (VJR-...)"
+                    android:inputType="textVisiblePassword"
+                    android:textColor="#F4F1EA"
+                    android:textColorHint="#646A74"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/inputDeviceId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Device ID (UUID)"
+                    android:inputType="text"
+                    android:textColor="#F4F1EA"
+                    android:textColorHint="#646A74"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/inputChallenge"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Challenge nonce"
+                    android:inputType="textVisiblePassword"
+                    android:textColor="#F4F1EA"
+                    android:textColorHint="#646A74"
+                    android:textSize="13sp" />
+
+                <Button
+                    android:id="@+id/btnManualContinue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="#C8A66A"
+                    android:text="Continue with details"
+                    android:textColor="#08090B" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- STEP 2: VERIFY PASSCODE -->
+        <LinearLayout
+            android:id="@+id/layoutStepPasscode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="#101216"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/step_passcode_title"
+                android:textColor="#F4F1EA"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="3dp"
+                android:text="@string/step_passcode_desc"
+                android:textColor="#9499A3"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/txtScannedTarget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="#C8A66A"
+                android:textSize="12sp" />
+
+            <EditText
+                android:id="@+id/inputPasscode"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:background="#161B22"
+                android:gravity="center"
+                android:hint="• • •   • • •"
+                android:inputType="number"
+                android:maxLength="7"
+                android:textColor="#F4F1EA"
+                android:textColorHint="#646A74"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btnSubmitEnroll"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="#C8A66A"
+                android:text="@string/btn_verify_connect"
+                android:textColor="#08090B"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- STEP 3: AWAITING APPROVAL -->
+        <LinearLayout
+            android:id="@+id/layoutStepAwaitingApproval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="#101216"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:id="@+id/progressAwaiting"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:indeterminateTint="#C8A66A" />
+
+            <TextView
+                android:id="@+id/txtAwaitingTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/step_awaiting_title"
+                android:textColor="#F4F1EA"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtAwaitingDesc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:lineSpacingExtra="3dp"
+                android:text="@string/step_awaiting_desc"
+                android:textColor="#9499A3"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/txtFingerprintSummary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center"
+                android:textColor="#75B798"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/btnRestartPairing"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="#25282E"
+                android:text="@string/btn_restart_pairing"
+                android:textColor="#F4F1EA"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- STEP 4: CONNECTED -->
+        <LinearLayout
+            android:id="@+id/layoutStepConnected"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="#101216"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✓"
+                android:textColor="#75B798"
+                android:textSize="36sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="@string/step_connected_title"
+                android:textColor="#F4F1EA"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:lineSpacingExtra="3dp"
+                android:text="@string/step_connected_desc"
+                android:textColor="#9499A3"
+                android:textSize="13sp" />
+
+            <Button
+                android:id="@+id/btnDone"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="24dp"
+                android:backgroundTint="#75B798"
+                android:text="@string/btn_done"
+                android:textColor="#08090B"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Status / Error Feedback -->
+        <TextView
+            android:id="@+id/txtEnrollResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:lineSpacingExtra="2dp"
+            android:textColor="#F85149"
+            android:textIsSelectable="true"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</ScrollView>

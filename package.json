@@ -1,0 +1,63 @@
+{
+  "name": "vajra-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "postinstall": "prisma generate",
+    "dev": "tsx server.ts",
+    "start": "node server.ts",
+    "build": "prisma generate && vite build",
+    "preview": "node server.ts",
+    "clean": "rm -rf dist server.js",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "db:generate": "prisma generate",
+    "db:validate": "node scripts/verify-prisma-validate.mjs",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "start:prod": "NODE_ENV=production APP_ENV=production tsx server.ts",
+    "test:unit": "tsx --test tests/*.test.ts",
+    "test:pg": "node scripts/verify-pg.mjs",
+    "test:e2e:browser": "node scripts/verify-browser-e2e.mjs",
+    "test:windows-agent": "node scripts/verify-windows-agent.mjs",
+    "test:android-agent": "node scripts/verify-android-agent.mjs",
+    "verify:audit": "npm audit --registry https://registry.npmjs.org"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@node-rs/argon2": "^2.2.2",
+    "@prisma/client": "6.19.3",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "recharts": "^2.15.1",
+    "tsx": "^4.21.0",
+    "vite": "^8.3.0",
+    "prisma": "6.19.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.14.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.21",
+    "esbuild": "^0.25.0",
+    "playwright-core": "^1.64.1",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2"
+  }
+}

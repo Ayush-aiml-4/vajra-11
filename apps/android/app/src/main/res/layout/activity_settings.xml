@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Server base URL (development). Use HTTPS in production. Never accept a server URL from a remote command." />
+    <EditText
+        android:id="@+id/inputServerUrl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="https://your-api.example.com"
+        android:inputType="textUri" />
+    <Button
+        android:id="@+id/btnSaveServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save server URL" />
+    <Button
+        android:id="@+id/btnDisconnect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Disconnect / clear local identity" />
+</LinearLayout>

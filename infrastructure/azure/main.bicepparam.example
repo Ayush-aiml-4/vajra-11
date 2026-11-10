@@ -1,0 +1,22 @@
+// VAJRA — Example Bicep Parameters Template (Placeholder-Only)
+// Copy locally outside Git and supply `@secure()` parameters via CI/CD Key Vault or interactive prompt.
+// NEVER commit real passwords, connection strings, or session keys.
+
+using './main.bicep'
+
+param namePrefix = 'vajra'
+param environmentName = 'production'
+param appServiceSkuName = 'B1'
+param postgresSkuName = 'Standard_B1ms'
+param postgresSkuTier = 'Burstable'
+param postgresStorageSizeGB = 32
+param postgresBackupRetentionDays = 14
+param postgresGeoRedundantBackup = false
+param postgresAdminLogin = 'vajra_pgadmin'
+param customPublicOrigin = ''
+
+// Supply secure values dynamically via environment variables at deployment time:
+param postgresAdminPassword = readEnvironmentVariable('VAJRA_DEPLOY_PG_ADMIN_PASSWORD')
+param runtimeDatabaseUrl = readEnvironmentVariable('VAJRA_DEPLOY_DATABASE_URL')
+param sessionSecret = readEnvironmentVariable('VAJRA_DEPLOY_SESSION_SECRET')
+param totpEncryptionKey = readEnvironmentVariable('VAJRA_DEPLOY_TOTP_ENCRYPTION_KEY')

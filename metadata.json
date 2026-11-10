@@ -1,0 +1,6 @@
+{
+  "name": "VAJRA Personal Security Console",
+  "description": "Personal cross-device security platform for transparent, auditable, and permission-aware monitoring of trusted Windows and Android devices.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

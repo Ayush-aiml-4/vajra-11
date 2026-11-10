@@ -1,0 +1,286 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Prompt 0009 Color System — Luxury Smoked Obsidian & Warm Bronze Atmosphere */
+    --vajra-bg: #08090B;
+    --vajra-obsidian: #08090B;
+    --vajra-charcoal: #111216;
+    --vajra-smoked-surface: #151519;
+    --vajra-surface: #101216;
+    --vajra-elevated: #15171C;
+    --vajra-border: #25282E;
+
+    --vajra-text-primary: #F4F1EA;
+    --vajra-text-secondary: #A6A8B1;
+    --vajra-text-muted: #6E727D;
+
+    --vajra-bronze: #C79A5A;
+    --vajra-champagne: #D9B980;
+    --vajra-gold: #C8A66A;
+    --vajra-gold-secondary: #9E7B47;
+
+    --vajra-jade: #78B999;
+    --vajra-info: #7D9BB8;
+    --vajra-warning: #D6A15A;
+    --vajra-threat: #D06C64;
+
+    --font-wordmark: 'Cormorant Garamond', Georgia, serif;
+    --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-sans: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  html, body {
+    font-family: var(--font-sans);
+    background-color: var(--vajra-bg);
+    color: var(--vajra-text-primary);
+    letter-spacing: -0.01em;
+    line-height: 1.55;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+  }
+
+  .font-wordmark {
+    font-family: var(--font-wordmark);
+    font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  code, pre, .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+/* ============================================================================
+   PART 1 & PART 19 — 5-LAYER ADAPTIVE CINEMATIC VAJRA ATMOSPHERE
+   VIDEO -> COLOR-PRESERVING DARK SCRIM -> ATMOSPHERIC BLEND -> UI SURFACES -> CONTENT
+   ============================================================================ */
+.vajra-cinematic-root {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background-color: #08090B;
+}
+
+.vajra-cinematic-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  will-change: opacity;
+  transition: opacity 600ms cubic-bezier(0.22, 1, 0.36, 1),
+              filter 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Layer 2: Color-preserving dark obsidian scrim */
+.vajra-cinematic-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: background 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Layer 3: Subtle warm bronze & champagne atmospheric blend + edge vignette */
+.vajra-cinematic-blend {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background-image:
+    radial-gradient(
+      ellipse 92% 86% at 50% 46%,
+      rgba(199, 154, 90, 0.03) 0%,
+      rgba(10, 9, 8, 0.22) 70%,
+      rgba(8, 9, 11, 0.56) 100%
+    ),
+    radial-gradient(
+      ellipse 68% 48% at 50% 18%,
+      rgba(199, 154, 90, 0.11),
+      transparent 74%
+    ),
+    radial-gradient(
+      ellipse 48% 36% at 84% 16%,
+      rgba(120, 185, 153, 0.032),
+      transparent 70%
+    );
+}
+
+/* Fallback ambient surface when video is disabled or reduced-motion is active */
+.vajra-ambient-surface {
+  background-color: #08090B;
+  background-image:
+    radial-gradient(ellipse 65% 42% at 50% -8%, rgba(199, 154, 90, 0.075), transparent 72%),
+    radial-gradient(ellipse 50% 35% at 85% 18%, rgba(120, 185, 153, 0.03), transparent 70%);
+}
+
+/* ============================================================================
+   PART 4, 5, 6, 7 — SMOKED OBSIDIAN TRANSLUCENT SURFACE SYSTEM
+   ============================================================================ */
+
+/* Primary Surface Card: rgba(18, 19, 24, 0.72) with subtle top light reflection */
+.vajra-surface-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.026) 0%,
+    rgba(18, 19, 24, 0.72) 100%
+  );
+  border: 1px solid rgba(244, 241, 234, 0.085);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 18px 42px -18px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 0 rgba(244, 241, 234, 0.05);
+  transition:
+    border-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.vajra-surface-card-interactive:hover {
+  border-color: rgba(199, 154, 90, 0.28);
+  transform: translateY(-1px);
+}
+
+/* Elevated Surface Card: rgba(24, 25, 31, 0.80) */
+.vajra-surface-elevated {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.032) 0%,
+    rgba(24, 25, 31, 0.80) 100%
+  );
+  border: 1px solid rgba(244, 241, 234, 0.095);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    0 22px 48px -18px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 0 rgba(244, 241, 234, 0.06);
+}
+
+/* Modal / Drawer Surface: rgba(15, 16, 20, 0.90) */
+.vajra-surface-modal {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 27, 34, 0.92) 0%,
+    rgba(15, 16, 20, 0.92) 100%
+  );
+  border: 1px solid rgba(244, 241, 234, 0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 28px 64px -16px rgba(0, 0, 0, 0.82),
+    inset 0 1px 0 0 rgba(244, 241, 234, 0.06);
+}
+
+/* Part 5: Translucent Sidebar Navigation Surface */
+.vajra-sidebar-surface {
+  background: rgba(12, 13, 17, 0.66);
+  border-right: 1px solid rgba(244, 241, 234, 0.075);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Part 6: Translucent Top Header Bar Surface */
+.vajra-header-surface {
+  background: rgba(12, 13, 17, 0.62);
+  border-bottom: 1px solid rgba(244, 241, 234, 0.075);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Part 9: Protection Score Centerpiece Aura */
+.vajra-score-aura {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(199, 154, 90, 0.09) 0%,
+    rgba(120, 185, 153, 0.05) 45%,
+    transparent 74%
+  );
+}
+
+/* ============================================================================
+   LOGIN PAGE — CINEMATIC VIDEO BACKGROUND & OBSIDIAN OVERLAY SYSTEM
+   ============================================================================ */
+.login-background-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+  background-color: #08090B;
+}
+
+.login-background-video-element {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  opacity: 0.90;
+  filter: brightness(0.98) contrast(1.10) saturate(1.10);
+  will-change: opacity;
+  transition: opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+              filter 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.login-background-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 9, 8, 0.42) 0%,
+      rgba(16, 13, 10, 0.26) 48%,
+      rgba(8, 9, 11, 0.52) 100%
+    ),
+    radial-gradient(
+      ellipse 90% 84% at 50% 48%,
+      rgba(199, 154, 90, 0.04) 0%,
+      rgba(10, 9, 8, 0.24) 68%,
+      rgba(5, 7, 9, 0.56) 100%
+    ),
+    radial-gradient(
+      ellipse 65% 44% at 50% 14%,
+      rgba(200, 166, 106, 0.095),
+      transparent 72%
+    );
+}
+
+.login-content {
+  position: relative;
+  z-index: 10;
+}
+
+.vajra-login-card-surface {
+  background-color: rgba(16, 18, 22, 0.80);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-background-video-element,
+  .vajra-cinematic-video {
+    display: none !important;
+  }
+
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
