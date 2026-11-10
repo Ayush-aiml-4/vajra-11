@@ -967,6 +967,15 @@ export default function App() {
     }
   }, [currentUser]);
 
+  const activeEnrollmentRef = useRef(activeEnrollment);
+  activeEnrollmentRef.current = activeEnrollment;
+  const connectModalOpenRef = useRef(connectModalOpen);
+  connectModalOpenRef.current = connectModalOpen;
+  const connectWizardStepRef = useRef(connectWizardStep);
+  connectWizardStepRef.current = connectWizardStep;
+  const pairedReadyDeviceIdRef = useRef(pairedReadyDeviceId);
+  pairedReadyDeviceIdRef.current = pairedReadyDeviceId;
+
   const fetchPendingApprovals = useCallback(async () => {
     if (!currentUser) {
       setPendingApprovals([]);
@@ -982,14 +991,15 @@ export default function App() {
         if (Array.isArray(data.pendingApprovals)) {
           setPendingApprovals(data.pendingApprovals);
           if (data.pendingApprovals.length > 0) {
+            const currentActive = activeEnrollmentRef.current;
             const match =
-              (activeEnrollment?.deviceId &&
+              (currentActive?.deviceId &&
                 data.pendingApprovals.find(
-                  (p: PendingDeviceApprovalDto) => p.deviceId === activeEnrollment.deviceId
+                  (p: PendingDeviceApprovalDto) => p.deviceId === currentActive.deviceId
                 )) ||
               data.pendingApprovals[0];
 
-            if (match && connectModalOpen && connectWizardStep === 2) {
+            if (match && connectModalOpenRef.current && connectWizardStepRef.current === 2) {
               setPairedReadyDeviceId(match.deviceId);
               setAwaitingDeviceDetails({
                 deviceName: match.name,
@@ -1005,7 +1015,7 @@ export default function App() {
     } catch {
       // transient network poll error ignored
     }
-  }, [currentUser, activeEnrollment?.deviceId, connectModalOpen, connectWizardStep]);
+  }, [currentUser?.id]);
 
   // Real-time Owner Event Stream (SSE) + Background Recovery Polling
   useEffect(() => {
@@ -1035,6 +1045,23 @@ export default function App() {
               `${p.deviceName || 'New device'} completed verification and is waiting for your authorization.`,
               'info'
             );
+
+            // Trigger OS Notification if user granted permission
+            if (
+              typeof window !== 'undefined' &&
+              'Notification' in window &&
+              Notification.permission === 'granted'
+            ) {
+              try {
+                new Notification('VAJRA — Device Authorization Required', {
+                  body: `${p.deviceName || 'New device'} verified its identity and requires your authorization.`,
+                  icon: '/favicon.ico',
+                });
+              } catch {
+                // Ignore browser notification failure
+              }
+            }
+
             void fetchPendingApprovals();
             void fetchEnrolledDevices();
             void fetchNotifications();
@@ -1067,7 +1094,7 @@ export default function App() {
           const p = parsed.payload;
           if (p?.deviceId) {
             setPendingApprovals((prev) => prev.filter((item) => item.deviceId !== p.deviceId));
-            if (pairedReadyDeviceId === p.deviceId) {
+            if (pairedReadyDeviceIdRef.current === p.deviceId) {
               setConnectModalOpen(false);
             }
             showToast(`Enrollment declined for ${p.deviceName || 'device'}.`, 'info');
@@ -1095,7 +1122,7 @@ export default function App() {
       if (eventSource) eventSource.close();
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [currentUser, fetchPendingApprovals, pairedReadyDeviceId]);
+  }, [currentUser?.id, fetchPendingApprovals]);
 
   // Live polling for device scan & passcode verification in Step 2
   useEffect(() => {
@@ -1570,16 +1597,30 @@ export default function App() {
           dev.lifecycleState === 'ENROLLMENT_PENDING' &&
           dev.credentialStatus === 'PENDING_CONFIRMATION';
 
+        const hasHeartbeat = Boolean(
+          dev.lastHeartbeatAt && !Number.isNaN(Date.parse(dev.lastHeartbeatAt))
+        );
+        let statusLabel = pendingApproval ? 'Ready for approval' : lifecycleInfo.label;
+        let statusTone = pendingApproval ? 'warning' : lifecycleInfo.tone;
+        let statusSummary = pendingApproval
+          ? 'This device verified its identity and is waiting for your confirmation.'
+          : lifecycleInfo.summary;
+
+        if (!pendingApproval && dev.lifecycleState === 'TRUSTED' && !hasHeartbeat) {
+          statusLabel = 'Enrolled · Pending Heartbeat';
+          statusTone = 'warning';
+          statusSummary =
+            'Device identity confirmed by owner. Waiting for companion agent to transmit signed telemetry.';
+        }
+
         return {
           id: dev.id,
           name: dev.name,
           platform: dev.deviceType,
           lifecycleState: dev.lifecycleState,
-          statusLabel: pendingApproval ? 'Ready for approval' : lifecycleInfo.label,
-          statusTone: pendingApproval ? 'warning' : lifecycleInfo.tone,
-          statusSummary: pendingApproval
-            ? 'This device verified its identity and is waiting for your confirmation.'
-            : lifecycleInfo.summary,
+          statusLabel,
+          statusTone,
+          statusSummary,
           lastSeenLabel: dev.lastSeenAt
             ? formatRelativeTime(dev.lastSeenAt)
             : dev.enrolledAt
@@ -1607,6 +1648,9 @@ export default function App() {
               if (ageMin <= connectedMax) return 'Agent connected';
               if (ageMin <= staleMax) return 'Heartbeat stale';
               return 'Agent offline';
+            }
+            if (dev.connectivityStatus === 'ONLINE' && !dev.lastHeartbeatAt) {
+              return 'Awaiting initial heartbeat';
             }
             if (dev.connectivityStatus === 'ONLINE') return 'Marked online';
             if (dev.connectivityStatus === 'OFFLINE') return 'Offline';
@@ -4045,6 +4089,29 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3.5 sm:gap-4">
+            {pendingApprovals.length > 0 && (
+              <button
+                type="button"
+                data-testid="header-pending-approvals-alert"
+                onClick={() => {
+                  const first = pendingApprovals[0];
+                  setAwaitingDeviceDetails({
+                    deviceName: first.name,
+                    deviceType: first.deviceType,
+                    publicKeyFingerprint: first.publicKeyFingerprint,
+                    hardwareBacked: first.hardwareBacked ?? false,
+                  });
+                  setPairedReadyDeviceId(first.deviceId);
+                  setConnectWizardStep(3);
+                  setConnectModalOpen(true);
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C8A66A]/20 border border-[#C8A66A] text-[#C8A66A] hover:bg-[#C8A66A]/30 text-xs font-semibold animate-pulse transition-all cursor-pointer shadow-lg"
+              >
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>{pendingApprovals.length} Approval{pendingApprovals.length > 1 ? 's' : ''} Needed</span>
+              </button>
+            )}
+
             <div className="hidden sm:block">
               <StatusBadge
                 tone={
@@ -4096,7 +4163,7 @@ export default function App() {
           {pendingApprovals.length > 0 && (
             <div
               data-testid="pending-approvals-banner"
-              className="rounded-xl border border-[#C8A66A]/50 bg-[#14120D] p-5 text-xs space-y-4 shadow-xl animate-in fade-in duration-300"
+              className="sticky top-24 z-20 rounded-xl border border-[#C8A66A]/70 bg-[#14120D]/95 backdrop-blur-md p-5 text-xs space-y-4 shadow-2xl ring-1 ring-[#C8A66A]/30 animate-in fade-in duration-300"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -6137,7 +6204,7 @@ export default function App() {
                       title={
                         selectedDrawerDevice.isDemo
                           ? 'Simulate sample location check'
-                          : 'Physical GPS/network location collection is not implemented in the native agent'
+                          : 'Physical GPS/network location collection is deferred and not implemented in the native agent'
                       }
                       onClick={() =>
                         void handleExecuteDeviceAction(
@@ -6154,7 +6221,7 @@ export default function App() {
                       <p className="text-[11px] text-[#9499A3]">
                         {selectedDrawerDevice.isDemo
                           ? 'Sample preview simulation'
-                          : 'Not implemented in agent'}
+                          : 'Deferred (Requires native agent update)'}
                       </p>
                     </button>
 
@@ -6169,7 +6236,7 @@ export default function App() {
                         !selectedDrawerDevice.isDemo &&
                         selectedDrawerDevice.platform !== 'ANDROID'
                           ? 'Audible ring is supported only by the Android companion app'
-                          : undefined
+                          : 'Trigger high-priority audible ring alert on companion phone'
                       }
                       onClick={() =>
                         void handleExecuteDeviceAction(selectedDrawerDevice, 'RING_DEVICE')
@@ -6178,11 +6245,11 @@ export default function App() {
                     >
                       <div className="flex items-center gap-2 text-xs font-semibold text-[#F4F1EA]">
                         <Volume2 className="w-3.5 h-3.5 text-[#C8A66A]" />
-                        <span>Ring</span>
+                        <span>Audible Alarm</span>
                       </div>
                       <p className="text-[11px] text-[#9499A3]">
                         {selectedDrawerDevice.platform === 'ANDROID'
-                          ? 'Queued until phone confirms'
+                          ? 'Dispatches on device sync'
                           : 'Android companion only'}
                       </p>
                     </button>
@@ -6193,7 +6260,7 @@ export default function App() {
                       title={
                         selectedDrawerDevice.isDemo
                           ? 'Simulate sample recovery message'
-                          : 'Physical OS lock-screen message display is not implemented in the native agent'
+                          : 'Physical OS lock-screen message display requires desktop agent or MDM privilege'
                       }
                       onClick={() => {
                         setRecoveryModalMode('MESSAGE');
@@ -6208,7 +6275,7 @@ export default function App() {
                       <p className="text-[11px] text-[#9499A3]">
                         {selectedDrawerDevice.isDemo
                           ? 'Sample preview simulation'
-                          : 'Not implemented in agent'}
+                          : 'Requires desktop agent or MDM'}
                       </p>
                     </button>
 

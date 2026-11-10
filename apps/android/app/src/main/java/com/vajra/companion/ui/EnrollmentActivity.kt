@@ -513,6 +513,16 @@ class EnrollmentActivity : AppCompatActivity() {
                     updateStepVisuals(3)
                     startPollingApproval(targetServer, bundle.deviceId) {
                         updateStepVisuals(4)
+                        lifecycleScope.launch {
+                            delay(2000)
+                            if (!isFinishing && !isDestroyed) {
+                                val intent = Intent(this@EnrollmentActivity, MainActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                                }
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
                     }
                 } else {
                     result.text = outcome.errorMessage ?: "Enrollment submission failed."
@@ -521,6 +531,10 @@ class EnrollmentActivity : AppCompatActivity() {
         }
 
         btnDone.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startActivity(intent)
             finish()
         }
     }
@@ -619,6 +633,7 @@ class EnrollmentActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             val url = "${baseUrl.trimEnd('/')}/api/devices/$deviceId/enrollment/status"
             var attempts = 0
+            var consecutiveNetworkErrors = 0
             while (isActive && attempts < 120) { // Poll for up to 5 minutes
                 delay(2500)
                 attempts++
@@ -629,6 +644,7 @@ class EnrollmentActivity : AppCompatActivity() {
                         .build()
 
                     client.newCall(req).execute().use { res ->
+                        consecutiveNetworkErrors = 0
                         if (res.isSuccessful) {
                             val json = JSONObject(res.body?.string().orEmpty())
                             val status = json.optString("status")
@@ -637,6 +653,13 @@ class EnrollmentActivity : AppCompatActivity() {
                                 val resolvedState = if (lifecycleState.isNotBlank()) lifecycleState else "TRUSTED"
                                 val identity = AndroidKeystoreIdentity(this@EnrollmentActivity)
                                 identity.saveMeta(deviceId, baseUrl, resolvedState)
+
+                                // Enqueue immediate one-time heartbeat & command sync
+                                HeartbeatWorker.enqueueImmediate(this@EnrollmentActivity)
+                                CommandPollWorker.enqueueImmediate(this@EnrollmentActivity)
+                                HeartbeatWorker.schedule(this@EnrollmentActivity)
+                                CommandPollWorker.schedule(this@EnrollmentActivity)
+
                                 withContext(Dispatchers.Main) {
                                     isPollingApproval = false
                                     onConnected()
@@ -664,7 +687,12 @@ class EnrollmentActivity : AppCompatActivity() {
                         }
                     }
                 } catch (_: Exception) {
-                    // transient network poll errors ignored
+                    consecutiveNetworkErrors++
+                    if (consecutiveNetworkErrors >= 3) {
+                        withContext(Dispatchers.Main) {
+                            txtAwaitingDesc?.text = "Connecting to server (attempt $attempts)... Please ensure the server is reachable."
+                        }
+                    }
                 }
             }
             if (isActive) {

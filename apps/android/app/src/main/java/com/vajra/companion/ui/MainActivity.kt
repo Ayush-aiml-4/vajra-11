@@ -1,14 +1,18 @@
 package com.vajra.companion.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.vajra.companion.R
 import com.vajra.companion.identity.AndroidKeystoreIdentity
 import com.vajra.companion.work.CommandPollWorker
@@ -28,10 +32,17 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var identity: AndroidKeystoreIdentity
 
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
+            // Notification permission result handled
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         identity = AndroidKeystoreIdentity(this)
+
+        checkNotificationPermission()
 
         // Onboarding actions
         findViewById<Button>(R.id.btnConnectDevice)?.setOnClickListener {
@@ -57,10 +68,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         refresh()
         if (identity.loadMeta() != null) {
+            HeartbeatWorker.enqueueImmediate(this)
+            CommandPollWorker.enqueueImmediate(this)
             HeartbeatWorker.schedule(this)
             CommandPollWorker.schedule(this)
         }
@@ -101,11 +122,11 @@ class MainActivity : AppCompatActivity() {
         val secLevel = identity.getDetailedSecurityLevel()
         when (secLevel) {
             AndroidKeystoreIdentity.KeystoreSecurityLevel.STRONGBOX -> {
-                txtKeystoreTrust?.text = "StrongBox Keymaster (Dedicated Hardware HSM)"
+                txtKeystoreTrust?.text = "StrongBox Keymaster (Local HSM · Unattested by Server)"
                 txtKeystoreTrust?.setTextColor(0xFF75B798.toInt())
             }
             AndroidKeystoreIdentity.KeystoreSecurityLevel.TEE -> {
-                txtKeystoreTrust?.text = "Hardware Keystore (TEE Hardware-Backed)"
+                txtKeystoreTrust?.text = "Hardware Keystore (Local TEE · Unattested by Server)"
                 txtKeystoreTrust?.setTextColor(0xFF75B798.toInt())
             }
             AndroidKeystoreIdentity.KeystoreSecurityLevel.SOFTWARE -> {

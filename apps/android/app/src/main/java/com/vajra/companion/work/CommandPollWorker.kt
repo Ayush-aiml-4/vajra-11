@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -143,6 +144,11 @@ class CommandPollWorker(
                 ExistingPeriodicWorkPolicy.KEEP,
                 req
             )
+        }
+
+        fun enqueueImmediate(context: Context) {
+            val req = OneTimeWorkRequestBuilder<CommandPollWorker>().build()
+            WorkManager.getInstance(context).enqueue(req)
         }
 
         fun cancel(context: Context) {

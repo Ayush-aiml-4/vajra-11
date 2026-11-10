@@ -7,6 +7,7 @@ import android.os.BatteryManager
 import android.os.Build
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -145,6 +146,11 @@ class HeartbeatWorker(
                 ExistingPeriodicWorkPolicy.KEEP,
                 req
             )
+        }
+
+        fun enqueueImmediate(context: Context) {
+            val req = OneTimeWorkRequestBuilder<HeartbeatWorker>().build()
+            WorkManager.getInstance(context).enqueue(req)
         }
 
         fun cancel(context: Context) {
