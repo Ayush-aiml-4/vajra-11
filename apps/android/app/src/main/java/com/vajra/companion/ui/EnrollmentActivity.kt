@@ -388,13 +388,6 @@ class EnrollmentActivity : AppCompatActivity() {
 
         inputServerUrl.setText(defaultServer)
 
-        btnRestartPairing?.setOnClickListener {
-            isPollingApproval = false
-            activeBundle = null
-            result.text = ""
-            updateStepVisuals(1)
-        }
-
         fun updateStepVisuals(step: Int) {
             stepTab1.setTextColor(if (step >= 1) 0xFFC8A66A.toInt() else 0xFF646A74.toInt())
             stepTab2.setTextColor(if (step >= 2) 0xFFC8A66A.toInt() else 0xFF646A74.toInt())
@@ -412,6 +405,13 @@ class EnrollmentActivity : AppCompatActivity() {
             layoutStepPasscode.visibility = if (step == 2) View.VISIBLE else View.GONE
             layoutStepAwaitingApproval.visibility = if (step == 3) View.VISIBLE else View.GONE
             layoutStepConnected.visibility = if (step == 4) View.VISIBLE else View.GONE
+        }
+
+        btnRestartPairing?.setOnClickListener {
+            isPollingApproval = false
+            activeBundle = null
+            result.text = ""
+            updateStepVisuals(1)
         }
 
         fun onBundleReady(bundle: ParsedPairingBundle) {
